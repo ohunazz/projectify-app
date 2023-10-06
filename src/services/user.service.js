@@ -1,16 +1,14 @@
 import { prisma } from "../prisma/index.js";
+import crypto from "crypto-js";
 
 class UserService {
     signUp = async (input) => {
-        // console.log(input);
-        // const finalInput = { ...input };
         try {
             await prisma.user.create({
                 data: input
             });
         } catch (error) {
-            return error;
-            // throw new Error(error);
+            throw new Error(error);
         }
     };
 }
