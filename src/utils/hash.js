@@ -1,18 +1,34 @@
-import crypto from "crypto-js";
+import bcrypt from "bcryptjs";
 
-export const hashFunction = (input) => {
-    const hash = crypto.SHA256(input);
-    const hashString = hash.toString(crypto.enc.Hex);
-    // console.log(hashString);
-    return hashString;
-};
+// import crypto from "crypto-js";
 
-export const generateSalt = () => {
-    const chars = "abcdefghijklmnopqrstuvwxyz";
-    let salt = "";
-    for (let i = 0; i < 10; i++) {
-        const randomIdx = Math.floor(Math.random() * 26);
-        salt += chars[randomIdx];
-    }
-    return salt;
-};
+// export const hashFunction = (input) => {
+//     const hash = crypto.SHA256(input);
+//     const hashString = hash.toString(crypto.enc.Hex);
+//     // console.log(hashString);
+//     return hashString;
+// };
+
+// export const generateSalt = () => {
+//     const chars = "abcdefghijklmnopqrstuvwxyz";
+//     let salt = "";
+//     for (let i = 0; i < 10; i++) {
+//         const randomIdx = Math.floor(Math.random() * 26);
+//         salt += chars[randomIdx];
+//     }
+//     return salt;
+// };
+
+class Bcrypt {
+    hash = async (password) => {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt); // or we can write (paswword, 10)
+        return hash;
+    };
+
+    compare = async (password, hash) => {
+        return await bcrypt.compare(password, hash);
+    };
+}
+
+export const hasher = new Bcrypt();
