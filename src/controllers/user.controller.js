@@ -19,6 +19,7 @@ class UserController {
                 message: "Success"
             });
         } catch (error) {
+            console.log(error);
             res.status(500).json({
                 message: error.massage
             });
