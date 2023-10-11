@@ -1,16 +1,22 @@
 import { prisma } from "../prisma/index.js";
-// import { hashFunction, generateSalt } from "../utils/hash.js";
-import { hasher } from "../utils/hash.js";
+import { hasher, crypto } from "../utils/hash.js";
+import { mailer } from "../utils/mailer.js";
 
 class UserService {
     signUp = async (input) => {
         try {
-            // const salt = generateSalt();
-
             const hashedPassword = await hasher.hash(input.password);
+            const activationToken = crypto.createToken();
+            const hashedActivationToken = crypto.hash(activationToken);
+            console.log(activationToken, hashedActivationToken);
             await prisma.user.create({
-                data: { ...input, password: hashedPassword } //`${salt}.${hashedPassword}`
+                data: {
+                    ...input,
+                    password: hashedPassword,
+                    activationToken: hashedActivationToken
+                }
             });
+            await mailer.sendActivationMail(input.email, activationToken);
         } catch (error) {
             throw new Error(error);
         }
@@ -75,6 +81,46 @@ class UserService {
                 data: input
             });
         } catch (error) {
+            throw error;
+        }
+    };
+
+    activate = async (token) => {
+        try {
+            const hashedActivationToken = crypto.hash(token);
+            console.log(hashedActivationToken);
+
+            const user = await prisma.user.findFirst({
+                where: {
+                    activationToken: hashedActivationToken
+                },
+
+                select: {
+                    id: true,
+                    activationToken: true
+                }
+            });
+
+            if (!user) {
+                throw new Error("User not found with provided token");
+            }
+
+            const isTokenMatchs = crypto.compare(token, user.activationToken);
+            if (!isTokenMatchs) {
+                throw new Error("Invalid Token");
+            }
+
+            await prisma.user.update({
+                where: {
+                    id: user.id
+                },
+                data: {
+                    status: "ACTIVE",
+                    activationToken: ""
+                }
+            });
+        } catch (error) {
+            console.log(error);
             throw error;
         }
     };

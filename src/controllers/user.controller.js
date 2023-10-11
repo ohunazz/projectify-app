@@ -45,7 +45,7 @@ class UserController {
                 statusCode = 401;
             }
             res.status(statusCode).json({
-                message: error.message
+                error: error.message
             });
         }
     };
@@ -66,6 +66,34 @@ class UserController {
         } catch (error) {
             res.status(500).json({
                 massage: error
+            });
+        }
+    };
+
+    activate = async (req, res) => {
+        const {
+            query: { activationToken }
+        } = req;
+        console.log(activationToken);
+
+        if (!activationToken) {
+            res.status(400).json({
+                message: "Activation Token is missing"
+            });
+
+            return;
+        }
+
+        try {
+            await userService.activate(activationToken);
+
+            res.status(200).json({
+                message: "Success"
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                massage: error.massage
             });
         }
     };
