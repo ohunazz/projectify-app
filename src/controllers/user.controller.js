@@ -9,7 +9,8 @@ class UserController {
             preferredFirstName: body.preferredFirstName,
             firstName: body.firstName,
             lastName: body.lastName,
-            password: body.password
+            password: body.password,
+            bio: body.bio
         };
 
         try {
@@ -18,8 +19,81 @@ class UserController {
                 message: "Success"
             });
         } catch (error) {
+            console.log(error);
             res.status(500).json({
                 message: error.massage
+            });
+        }
+    };
+
+    login = async (req, res) => {
+        const { body } = req;
+        const input = {
+            email: body.email,
+            password: body.password
+        };
+
+        try {
+            await userService.login(input);
+
+            res.status(200).json({
+                message: "Success"
+            });
+        } catch (error) {
+            let statusCode = 500;
+            if (error.massage === "Invalid Credentials") {
+                statusCode = 401;
+            }
+            res.status(statusCode).json({
+                error: error.message
+            });
+        }
+    };
+
+    update = async (req, res) => {
+        const allowedFields = ["firstName", "lastName", "bio"];
+        const { body, params } = req;
+
+        const input = {};
+        allowedFields.forEach((field) => {
+            if (body[field]) {
+                input[field] = body[field];
+            }
+        });
+        try {
+            await userService.update(input, params.id);
+            res.status(204).send();
+        } catch (error) {
+            res.status(500).json({
+                massage: error
+            });
+        }
+    };
+
+    activate = async (req, res) => {
+        const {
+            query: { activationToken }
+        } = req;
+        console.log(activationToken);
+
+        if (!activationToken) {
+            res.status(400).json({
+                message: "Activation Token is missing"
+            });
+
+            return;
+        }
+
+        try {
+            await userService.activate(activationToken);
+
+            res.status(200).json({
+                message: "Success"
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                massage: error.massage
             });
         }
     };
