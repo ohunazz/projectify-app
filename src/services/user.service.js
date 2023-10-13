@@ -1,14 +1,15 @@
 import { prisma } from "../prisma/index.js";
-import { hasher, crypto } from "../utils/hash.js";
+import { crypto } from "../utils/crypto.js";
 import { mailer } from "../utils/mailer.js";
+import { bcrypt } from "../utils/bcrypt.js";
+import { date } from "../utils/date.js";
 
 class UserService {
     signUp = async (input) => {
         try {
-            const hashedPassword = await hasher.hash(input.password);
+            const hashedPassword = await bcrypt.hash(input.password);
             const activationToken = crypto.createToken();
             const hashedActivationToken = crypto.hash(activationToken);
-            console.log(activationToken, hashedActivationToken);
             await prisma.user.create({
                 data: {
                     ...input,
@@ -22,64 +23,59 @@ class UserService {
         }
     };
 
-    // login = async (input) => {
-    //     try {
-    //         const user = await prisma.user.findFirst({
-    //             where: {
-    //                 email: input.email
-    //             }
-    //         });
-
-    //         if (user) {
-    //             if (user.password !== input.password) {
-    //                 throw new Error("Invalid Credentials");
-    //             } else if (user.password === input.password) {
-    //                 return user;
-    //             }
-    //         } else {
-    //             throw new Error("Invalid Credentials");
-    //         }
-    //     } catch (error) {
-    //         throw new Error(error);
-    //     }
-    // };
-
     login = async (input) => {
         try {
             const user = await prisma.user.findFirst({
                 where: {
                     email: input.email
+                },
+                select: {
+                    id: true,
+                    status: true,
+                    password: true
                 }
             });
 
-            if (!user) {
-                // const [salt, userHashedPassword] = user.password.split(".");
-                // const hashedPassword = hashFunction(input.password + salt);
-                // if (userHashedPassword !== hashedPassword) {
-                //     throw new Error("Invalid Credentials");
-                // } else if (userHashedPassword === hashedPassword) {
-                //     return user;
-                // }
+            if (!user) throw new Error("Invalid Credentials");
+
+            if (user.status === "INACTIVE") {
+                const activationToken = crypto.createToken();
+                const hashedActivationToken = crypto.hash(activationToken);
+
+                await prisma.user.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        activationToken: hashedActivationToken
+                    }
+                });
+
+                await mailer.sendActivationMail(input.email, activationToken);
+
+                throw new Error(
+                    "We just sent you activation email. Follow instructions"
+                );
             }
 
-            const isPasswordMatch = await hasher.compare(
+            const isPasswordMatches = await bcrypt.compare(
                 input.password,
                 user.password
             );
-            if (!isPasswordMatch) {
+            if (!isPasswordMatches) {
                 throw new Error("Invalid Credentials");
             }
-        } catch (error) {
-            throw error;
-        }
-    };
 
-    update = async (input, id) => {
-        try {
-            await prisma.user.update({
-                where: { id },
-                data: input
+            const sessionId = crypto.createToken();
+            const hashedSessionId = crypto.hash(sessionId);
+            await prisma.session.create({
+                data: {
+                    sessionId: hashedSessionId,
+                    userId: user.id
+                }
             });
+
+            return sessionId;
         } catch (error) {
             throw error;
         }
@@ -88,13 +84,10 @@ class UserService {
     activate = async (token) => {
         try {
             const hashedActivationToken = crypto.hash(token);
-            console.log(hashedActivationToken);
-
             const user = await prisma.user.findFirst({
                 where: {
                     activationToken: hashedActivationToken
                 },
-
                 select: {
                     id: true,
                     activationToken: true
@@ -102,11 +95,6 @@ class UserService {
             });
 
             if (!user) {
-                throw new Error("User not found with provided token");
-            }
-
-            const isTokenMatchs = crypto.compare(token, user.activationToken);
-            if (!isTokenMatchs) {
                 throw new Error("Invalid Token");
             }
 
@@ -116,11 +104,143 @@ class UserService {
                 },
                 data: {
                     status: "ACTIVE",
-                    activationToken: ""
+                    activationToken: null
                 }
             });
         } catch (error) {
-            console.log(error);
+            throw error;
+        }
+    };
+
+    forgotPassword = async (email) => {
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    email
+                },
+                select: {
+                    id: true
+                }
+            });
+
+            if (!user) {
+                throw new Error(
+                    "We could not find a user with the email you provided"
+                );
+            }
+
+            const passwordResetToken = crypto.createToken();
+            const hashedPasswordResetToken = crypto.hash(passwordResetToken);
+
+            await prisma.user.update({
+                where: {
+                    id: user.id
+                },
+                data: {
+                    passwordResetToken: hashedPasswordResetToken,
+                    passwordResetTokenExpirationDate: date.addMinutes(10)
+                }
+            });
+
+            await mailer.sendPasswordResetToken(email, passwordResetToken);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    resetPassword = async (token, password) => {
+        try {
+            const hashedPasswordResetToken = crypto.hash(token);
+            const user = await prisma.user.findFirst({
+                where: {
+                    passwordResetToken: hashedPasswordResetToken
+                },
+                select: {
+                    id: true,
+                    passwordResetToken: true,
+                    passwordResetTokenExpirationDate: true
+                }
+            });
+
+            if (!user) {
+                throw new Error("Invalid Token");
+            }
+
+            const currentTime = new Date();
+            const tokenExpDate = new Date(
+                user.passwordResetTokenExpirationDate
+            );
+
+            if (tokenExpDate < currentTime) {
+                // Token Expired;
+                throw new Error("Reset Token Expired");
+            }
+
+            await prisma.user.update({
+                where: {
+                    id: user.id
+                },
+                data: {
+                    password: await bcrypt.hash(password),
+                    passwordResetToken: null,
+                    passwordResetTokenExpirationDate: null
+                }
+            });
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    getMe = async (sessionId) => {
+        const hashedSessionId = crypto.hash(sessionId);
+
+        try {
+            const session = await prisma.session.findFirst({
+                where: {
+                    sessionId: hashedSessionId
+                },
+
+                select: {
+                    userId: true
+                }
+            });
+
+            if (!session) {
+                throw new Error("Not Authenticated");
+            }
+
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: session.userId
+                },
+                select: {
+                    firstName: true,
+                    lastName: true,
+                    preferredFirstName: true,
+                    email: true
+                }
+            });
+
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    logout = async (sessionId) => {
+        const hashedSessionId = crypto.hash(sessionId);
+
+        try {
+            await prisma.session.deleteMany({
+                where: {
+                    sessionId: hashedSessionId
+                }
+            });
+        } catch (error) {
             throw error;
         }
     };
