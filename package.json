@@ -4,21 +4,23 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "start:dev": "nodemon scr/index.js",
         "prisma:g": "npx prisma generate --schema=./src/prisma/schema.prisma",
-        "prisma:p": "npx prisma db push --schema=./src/prisma/schema.prisma"
+        "db:p": "npx prisma db push --schema=./src/prisma/schema.prisma"
     },
     "author": "Okhun",
     "license": "ISC",
     "dependencies": {
-        "@prisma/client": "^5.4.1",
+        "@prisma/client": "^5.4.2",
         "bcryptjs": "^2.4.3",
+        "cookie-parser": "^1.4.6",
         "crypto-js": "^4.1.1",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
         "nodemailer": "^6.9.5"
     },
     "devDependencies": {
-        "prisma": "^5.4.1"
+        "prisma": "^5.4.2"
     },
     "type": "module"
 }
