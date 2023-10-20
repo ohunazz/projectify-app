@@ -1,23 +1,27 @@
 {
     "name": "projectify-app",
     "version": "1.0.0",
-    "description": "",
+    "description": "Project Management App",
     "main": "index.js",
     "scripts": {
         "start:dev": "nodemon scr/index.js",
         "prisma:g": "npx prisma generate --schema=./src/prisma/schema.prisma",
-        "db:p": "npx prisma db push --schema=./src/prisma/schema.prisma"
+        "db:p": "npx prisma db push --schema=./src/prisma/schema.prisma",
+        "start": "node src/index.js"
     },
-    "author": "Okhun",
+    "author": "Okhun Azzamkulov",
     "license": "ISC",
     "dependencies": {
         "@prisma/client": "^5.4.2",
         "bcryptjs": "^2.4.3",
         "cookie-parser": "^1.4.6",
+        "cookie-signature": "^1.2.1",
         "crypto-js": "^4.1.1",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
-        "nodemailer": "^6.9.5"
+        "jsonwebtoken": "^9.0.2",
+        "nodemailer": "^6.9.5",
+        "uuid": "^9.0.1"
     },
     "devDependencies": {
         "prisma": "^5.4.2"
