@@ -24,20 +24,19 @@ class Mailer {
         try {
             this.send({
                 to: emailAddress,
-                subject: "Projectify App | Activate Your Account",
-                html: `<a href="http://localhost:4000/users/activate?activationToken=${token}">Verify your email</a>`
+                subject: "Activate Your Account",
+                html: `<a href="http://localhost:3000/users/activate?activationToken=${token}">Verify your email</a> `
             });
         } catch (error) {
             throw error;
         }
     };
-
     sendPasswordResetToken = async (emailAddress, token) => {
         try {
             this.send({
                 to: emailAddress,
                 subject: "Projectify App | Reset Password",
-                html: `<a href="http://localhost:3000/reset-password/passwordResetToken=${token}">Reset Your Password</a>`
+                html: `<a href="http://localhost:4000/reset-password/passwordResetToken=${token}">Reset Your Password</a>`
             });
         } catch (error) {
             throw error;
