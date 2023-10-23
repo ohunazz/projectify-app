@@ -5,9 +5,9 @@
     "main": "index.js",
     "scripts": {
         "start:dev": "nodemon scr/index.js",
+        "start": "node src/index.js",
         "prisma:g": "npx prisma generate --schema=./src/prisma/schema.prisma",
-        "db:p": "npx prisma db push --schema=./src/prisma/schema.prisma",
-        "start": "node src/index.js"
+        "db:p": "npx prisma db push --schema=./src/prisma/schema.prisma"
     },
     "author": "Okhun Azzamkulov",
     "license": "ISC",
