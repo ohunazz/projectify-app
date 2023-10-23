@@ -1,5 +1,5 @@
 import express from "express";
-import { userRouter } from "./src/routes/user.route.js";
+import { userRouter } from "./routes/user.route.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
