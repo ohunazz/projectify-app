@@ -3,6 +3,8 @@ import { crypto } from "../utils/crypto.js";
 import { mailer } from "../utils/mailer.js";
 import { bcrypt } from "../utils/bcrypt.js";
 import { date } from "../utils/date.js";
+import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
 
 class UserService {
     signUp = async (input) => {
@@ -19,7 +21,7 @@ class UserService {
             });
             await mailer.sendActivationMail(input.email, activationToken);
         } catch (error) {
-            throw new Error(error);
+            throw error;
         }
     };
 
@@ -66,16 +68,17 @@ class UserService {
                 throw new Error("Invalid Credentials");
             }
 
-            const sessionId = crypto.createToken();
-            const hashedSessionId = crypto.hash(sessionId);
-            await prisma.session.create({
-                data: {
-                    sessionId: hashedSessionId,
+            const token = jwt.sign(
+                {
                     userId: user.id
+                },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: "2 days"
                 }
-            });
+            );
 
-            return sessionId;
+            return token;
         } catch (error) {
             throw error;
         }
@@ -191,27 +194,11 @@ class UserService {
         }
     };
 
-    getMe = async (sessionId) => {
-        const hashedSessionId = crypto.hash(sessionId);
-
+    getMe = async (userId) => {
         try {
-            const session = await prisma.session.findFirst({
-                where: {
-                    sessionId: hashedSessionId
-                },
-
-                select: {
-                    userId: true
-                }
-            });
-
-            if (!session) {
-                throw new Error("Not Authenticated");
-            }
-
             const user = await prisma.user.findUnique({
                 where: {
-                    id: session.userId
+                    id: userId
                 },
                 select: {
                     firstName: true,
@@ -231,13 +218,144 @@ class UserService {
         }
     };
 
-    logout = async (sessionId) => {
-        const hashedSessionId = crypto.hash(sessionId);
+    createTask = async (userId, input) => {
+        const id = uuid();
+        const task = {
+            ...input,
+            status: "TODO",
+            id
+        };
 
         try {
-            await prisma.session.deleteMany({
+            await prisma.user.update({
                 where: {
-                    sessionId: hashedSessionId
+                    id: userId
+                },
+                data: {
+                    tasks: {
+                        push: task
+                    }
+                }
+            });
+
+            return task;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    getTasks = async (userId) => {
+        try {
+            const tasks = await prisma.user.findUnique({
+                where: {
+                    id: userId
+                },
+
+                select: {
+                    tasks: true
+                }
+            });
+
+            return tasks;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    getTask = async (userId, taskId) => {
+        try {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: userId
+                },
+
+                select: {
+                    tasks: true
+                }
+            });
+
+            const task = user.tasks.find((task) => task.id === taskId);
+            if (!task) {
+                throw new Error("Task not found");
+            }
+
+            return task;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    deleteTask = async (userId, taskId) => {
+        try {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: userId
+                },
+
+                select: {
+                    tasks: true
+                }
+            });
+
+            const tasksToKeep = user.tasks.filter((task) => task.id !== taskId);
+
+            if (tasksToKeep.length === user.tasks.length) {
+                throw new Error("Task not found");
+            }
+
+            await prisma.user.update({
+                where: {
+                    id: userId
+                },
+
+                data: {
+                    tasks: tasksToKeep
+                }
+            });
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    updateTask = async (userId, taskId, input) => {
+        try {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: userId
+                },
+
+                select: {
+                    tasks: true
+                }
+            });
+
+            const tasksNotToUpdate = [];
+            let taskToUpdate = null;
+
+            user.tasks.forEach((task) => {
+                if (task.id === taskId) {
+                    taskToUpdate = task;
+                } else {
+                    tasksNotToUpdate.push(task);
+                }
+            });
+
+            if (!taskToUpdate) {
+                throw new Error("Task not found");
+            }
+
+            const updatedTask = {
+                ...taskToUpdate,
+                ...input
+            };
+
+            await prisma.user.update({
+                where: {
+                    id: userId
+                },
+
+                data: {
+                    tasks: [...tasksNotToUpdate, updatedTask]
                 }
             });
         } catch (error) {

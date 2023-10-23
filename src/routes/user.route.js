@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { userController } from "../controllers/user.controller.js";
 import { CookieMiddleware } from "../middlewares/cookie.middleware.js";
+import { userMiddleware } from "../middlewares/user.middleware.js";
 
 const userRouter = Router();
 
@@ -9,7 +10,40 @@ userRouter.post("/login", userController.login);
 userRouter.get("/activate", userController.activate);
 userRouter.patch("/forgot-password", userController.forgotPassword);
 userRouter.patch("/reset-password", userController.resetPassword);
-userRouter.get("/me", CookieMiddleware.verify, userController.getMe);
-userRouter.delete("/logout", CookieMiddleware.verify, userController.logout);
+userRouter.get("/me", userMiddleware.authenticate, userController.getMe);
+userRouter.delete(
+    "/logout",
+    userMiddleware.authenticate,
+    userController.logout
+);
+userRouter.patch(
+    "/me/tasks",
+    userMiddleware.authenticate,
+    userController.createTask
+);
+
+userRouter.get(
+    "/me/tasks",
+    userMiddleware.authenticate,
+    userController.getTasks
+);
+
+userRouter.get(
+    "/me/tasks/:taskId",
+    userMiddleware.authenticate,
+    userController.getTask
+);
+
+userRouter.patch(
+    "/me/tasks/:taskId",
+    userMiddleware.authenticate,
+    userController.updateTask
+);
+
+userRouter.delete(
+    "/me/tasks/:taskId/delete",
+    userMiddleware.authenticate,
+    userController.deleteTask
+);
 
 export { userRouter };
