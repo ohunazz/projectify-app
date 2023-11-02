@@ -25,6 +25,7 @@ export class GlobalError {
             isOperational,
             success
         });
+        next();
 
         // if (err.isOperational) {
         //     res.status(err.statusCode).json({
