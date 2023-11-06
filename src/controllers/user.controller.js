@@ -1,5 +1,4 @@
 import { userService } from "../services/user.service.js";
-import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async.js";
 import { CustomError } from "../utils/custom-error.js";
 class UserController {
