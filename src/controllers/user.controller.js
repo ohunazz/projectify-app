@@ -1,12 +1,11 @@
 import { userService } from "../services/user.service.js";
-import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async.js";
 import { CustomError } from "../utils/custom-error.js";
 class UserController {
     signUp = catchAsync(async (req, res) => {
         const { body } = req;
 
-        const input = {
+        const userInput = {
             email: body.email,
             preferredFirstName: body.preferredName,
             firstName: body.firstName,
@@ -14,7 +13,12 @@ class UserController {
             password: body.password
         };
 
-        await userService.signUp(input);
+        const companyInput = {
+            name: body.company.name,
+            position: body.company.position
+        };
+
+        await userService.signUp(userInput, companyInput);
         res.status(201).json({
             message: "Success"
         });
