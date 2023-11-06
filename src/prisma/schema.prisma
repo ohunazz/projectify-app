@@ -50,3 +50,16 @@ model User {
     tasks                            Tasks[]
     Company                          Company[]
 }
+
+model Project {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    description String
+    status      ProjectStatus @default(ACTIVE)
+    userId      String        @db.ObjectId
+}
+
+enum ProjectStatus {
+    ACTIVE
+    ARCHIVED
+}

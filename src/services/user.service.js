@@ -193,15 +193,24 @@ class UserService {
                 firstName: true,
                 lastName: true,
                 preferredFirstName: true,
-                email: true
+                email: true,
+                id: true
             }
         });
 
         if (!user) {
-            throw new Error("User not found");
+            throw new Error("User does not exist anymore, 404");
         }
 
-        return user;
+        const company = await prisma.company.findFirst({
+            where: { userId: user.id },
+            select: {
+                name: true,
+                position: true
+            }
+        });
+
+        return { ...user, company };
     };
 
     createTask = async (userId, input) => {
