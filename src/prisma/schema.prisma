@@ -31,7 +31,7 @@ model Company {
     name     String
     position String
     userId   String @unique @db.ObjectId
-    User     User   @relation(fields: [userId], references: [id])
+    user     User   @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -62,4 +62,17 @@ model Project {
 enum ProjectStatus {
     ACTIVE
     ARCHIVED
+}
+
+model TeamMember {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    firstName   String
+    lastName    String
+    email       String        @unique
+    password    String?
+    status      AccountStatus @default(INACTIVE)
+    userId      String        @db.ObjectId
+    inviteToken String?       @unique
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
 }
