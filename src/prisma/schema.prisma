@@ -31,10 +31,10 @@ model Company {
     name     String
     position String
     userId   String @unique @db.ObjectId
-    User     User   @relation(fields: [userId], references: [id])
+    admin    Admin  @relation(fields: [userId], references: [id])
 }
 
-model User {
+model Admin {
     id                               String        @id @default(auto()) @map("_id") @db.ObjectId
     email                            String        @unique
     preferredFirstName               String?
@@ -56,10 +56,23 @@ model Project {
     name        String
     description String
     status      ProjectStatus @default(ACTIVE)
-    userId      String        @db.ObjectId
+    adminId     String        @db.ObjectId
 }
 
 enum ProjectStatus {
     ACTIVE
     ARCHIVED
+}
+
+model TeamMember {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    firstName   String
+    lastName    String
+    email       String        @unique
+    password    String?
+    status      AccountStatus @default(INACTIVE)
+    userId      String        @db.ObjectId
+    inviteToken String?       @unique
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
 }
