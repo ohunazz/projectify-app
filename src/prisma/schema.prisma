@@ -31,7 +31,7 @@ model Company {
     name     String
     position String
     userId   String @unique @db.ObjectId
-    user     User   @relation(fields: [userId], references: [id])
+    admin    Admin  @relation(fields: [userId], references: [id])
 }
 
 model Admin {

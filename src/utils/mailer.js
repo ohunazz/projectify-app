@@ -43,6 +43,17 @@ class Mailer {
             throw error;
         }
     };
+    sendCreatePasswordInviteToTeamMember = async (emailAddress, token) => {
+        try {
+            await this.send({
+                to: emailAddress,
+                subject: "Projectify App | Welcome to the team",
+                html: `<a href="http://localhost:3000/team-member/create-password?inviteToken=${token}">Click to create a password</a>`
+            });
+        } catch (error) {
+            throw error;
+        }
+    };
 }
 
 export const mailer = new Mailer();
