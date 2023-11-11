@@ -30,8 +30,8 @@ model Company {
     id       String @id @default(auto()) @map("_id") @db.ObjectId
     name     String
     position String
-    adminId  String @unique @db.ObjectId
-    admin    Admin  @relation(fields: [adminId], references: [id])
+    userId   String @unique @db.ObjectId
+    user     User   @relation(fields: [userId], references: [id])
 }
 
 model Admin {
@@ -71,7 +71,7 @@ model TeamMember {
     email       String        @unique
     password    String?
     status      AccountStatus @default(INACTIVE)
-    adminId     String        @db.ObjectId
+    userId      String        @db.ObjectId
     inviteToken String?       @unique
     createdAt   DateTime      @default(now())
     updatedAt   DateTime      @updatedAt
