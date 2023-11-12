@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-class UserMiddleware {
+class AuthMiddleware {
     authenticate = (req, res, next) => {
         const { headers } = req;
 
@@ -36,4 +36,4 @@ class UserMiddleware {
     };
 }
 
-export const adminMiddleware = new UserMiddleware();
+export const authMiddleware = new AuthMiddleware();
