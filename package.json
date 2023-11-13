@@ -12,7 +12,7 @@
     "author": "Okhun Azzamkulov",
     "license": "ISC",
     "dependencies": {
-        "@prisma/client": "^5.4.2",
+        "@prisma/client": "^5.5.2",
         "bcryptjs": "^2.4.3",
         "cookie-parser": "^1.4.6",
         "cookie-signature": "^1.2.1",
@@ -24,7 +24,7 @@
         "uuid": "^9.0.1"
     },
     "devDependencies": {
-        "prisma": "^5.4.2"
+        "prisma": "^5.5.2"
     },
     "type": "module",
     "engines": {
