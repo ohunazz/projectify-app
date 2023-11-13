@@ -1,4 +1,5 @@
 import { adminService } from "../services/admin.service.js";
+import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async.js";
 import { CustomError } from "../utils/custom-error.js";
 class AdminController {

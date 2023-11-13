@@ -23,7 +23,7 @@ class TeamMemberService {
         );
     };
 
-    createPassword = async (inviteToken, password) => {
+    createPassword = async (inviteToken, password, email) => {
         const hashedInviteToken = crypto.hash(inviteToken);
         const hashedPassword = await bcrypt.hash(password);
 
@@ -39,6 +39,7 @@ class TeamMemberService {
 
         await prisma.teamMember.update({
             where: {
+                email: email,
                 inviteToken: hashedInviteToken
             },
 
@@ -48,6 +49,23 @@ class TeamMemberService {
                 inviteToken: null
             }
         });
+    };
+
+    getAll = async (adminId) => {
+        const teamMembers = await prisma.teamMember.findMany({
+            where: {
+                adminId: adminId
+            },
+
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                position: true,
+                createdAt: true
+            }
+        });
+        return teamMembers;
     };
 }
 
