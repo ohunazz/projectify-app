@@ -50,6 +50,23 @@ class TeamMemberService {
             }
         });
     };
+
+    getAll = async (adminId) => {
+        const teamMembers = await prisma.teamMember.findMany({
+            where: {
+                adminId: adminId
+            },
+
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                position: true,
+                createdAt: true
+            }
+        });
+        return teamMembers;
+    };
 }
 
 export const teamMemberService = new TeamMemberService();
