@@ -9,12 +9,18 @@ class TeamMemberController {
         const input = {
             firstName: body.firstName,
             lastName: body.lastName,
-            email: body.email
+            email: body.email,
+            position: body.position
         };
 
-        if (!input.firstName || !input.lastName || !input.email) {
+        if (
+            !input.firstName ||
+            !input.lastName ||
+            !input.email ||
+            !input.position
+        ) {
             throw new CustomError(
-                "All fields are required: First name, Last Name, Email",
+                "All fields are required: First name, Last Name, Email, Position",
                 400
             );
         }
