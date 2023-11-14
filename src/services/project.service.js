@@ -1,5 +1,6 @@
 import { prisma } from "../prisma/index.js";
 import { CustomError } from "../utils/custom-error.js";
+import { teamMemberService } from "./team-member.service.js";
 
 class ProjectService {
     create = async (input, adminId) => {
@@ -67,6 +68,53 @@ class ProjectService {
                 status: status
             }
         });
+    };
+
+    addContributor = async (adminId, projectId, teamMemberId) => {
+        await this.verifyProjectAndAminRelation(projectId, adminId);
+        await teamMemberService.verifyTeamMemberandAdminRelation(
+            teamMemberId,
+            adminId
+        );
+
+        await prisma.teamMemberProject.create({
+            data: { projectId, teamMemberId }
+        });
+    };
+
+    deactivateContributor = async (adminId, projectId, teamMemberId) => {
+        await this.verifyProjectAndAminRelation(projectId, adminId);
+        await teamMemberService.verifyTeamMemberandAdminRelation(
+            teamMemberId,
+            adminId
+        );
+
+        await prisma.teamMemberProject.updateMany({
+            where: {
+                projectId,
+                teamMemberId
+            },
+
+            data: {
+                status: "INACTIVE"
+            }
+        });
+    };
+
+    verifyProjectAndAminRelation = async (id, adminId) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id,
+                adminId
+            }
+        });
+
+        if (!project) {
+            throw new CustomError(
+                "Forbidden: Project does not belong to you or it does not exist",
+                403
+            );
+        }
     };
 }
 
