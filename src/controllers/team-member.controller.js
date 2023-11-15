@@ -61,6 +61,55 @@ class TeamMemberController {
             message: "You successfully created a password. Now, you can log in"
         });
     });
+
+    getAll = catchAsync(async (req, res) => {
+        const { adminId } = req;
+        const teamMembers = await teamMemberService.getAll(adminId);
+
+        res.status(200).json({
+            data: teamMembers
+        });
+    });
+
+    deactivate = catchAsync(async (req, res) => {
+        const { adminId, body } = req;
+        await teamMemberService.changeStatus(
+            adminId,
+            body.teamMemberId,
+            "INACTIVE"
+        );
+
+        res.status(204).send();
+    });
+
+    reactivate = catchAsync(async (req, res) => {
+        const { adminId, body } = req;
+        await teamMemberService.changeStatus(
+            adminId,
+            body.teamMemberId,
+            "ACTIVE"
+        );
+
+        res.status(204).send();
+    });
+
+    login = catchAsync(async (req, res) => {
+        const {
+            body: { email, password }
+        } = req;
+
+        if (!email || !password) {
+            throw new CustomError(
+                "All fields required: email and password",
+                400
+            );
+        }
+
+        const jwt = await teamMemberService.login(email, password);
+        res.status(200).json({
+            token: jwt
+        });
+    });
 }
 
 export const teamMemberController = new TeamMemberController();
