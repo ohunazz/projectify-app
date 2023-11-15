@@ -23,77 +23,17 @@ class TeamMemberService {
         );
     };
 
-    login = async (input) => {
-        const teamMember = await prisma.teamMember.findFirst({
-            where: {
-                email: input.email
-            },
-            select: {
-                id: true,
-                status: true,
-                password: true,
-                password: true
-            }
-        });
-
-        if (!teamMember) throw new CustomError("User does not exists", 404);
-
-        if (teamMember.status === "INACTIVE" && !teamMember.password) {
-            const inviteToken = crypto.createToken();
-            const hashedInviteToken = crypto.hash(inviteToken);
-
-            await prisma.teamMember.update({
-                where: {
-                    id: teamMember.id
-                },
-                data: {
-                    activationToken: hashedInviteToken
-                }
-            });
-
-            await mailer.sendCreatePasswordInviteToTeamMember(
-                input.email,
-                inviteToken
-            );
-
-            throw new CustomError(
-                "We just sent you password setup email. Follow instructions",
-                400
-            );
-        }
-
-        const isPasswordMatches = await bcrypt.compare(
-            input.password,
-            teamMember.password
-        );
-        if (!isPasswordMatches) {
-            throw new CustomError("Invalid Credentials", 401);
-        }
-
-        const token = jwt.sign(
-            {
-                teamMemberId: teamMember.id
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "2 days"
-            }
-        );
-
-        return token;
-    };
-
     createPassword = async (inviteToken, password, email) => {
         const hashedInviteToken = crypto.hash(inviteToken);
         const hashedPassword = await bcrypt.hash(password);
 
-        const admin = await prisma.teamMember.findFirst({
+        const teamMember = await prisma.teamMember.findFirst({
             where: {
                 inviteToken: hashedInviteToken
             }
         });
 
-        if (!admin) {
+        if (!teamMember) {
             throw new CustomError("Invalid Token", 400);
         }
 
@@ -125,23 +65,137 @@ class TeamMemberService {
                 createdAt: true
             }
         });
+
         return teamMembers;
     };
 
-    verifyTeamMemberandAdminRelation = async (id, adminId) => {
-        const teamMember = await prisma.teamMember.findUnique({
+    changeStatus = async (adminId, teamMemberId, status) => {
+        const teamMember = await prisma.teamMember.findFirst({
             where: {
-                id,
-                adminId
+                id: teamMemberId,
+                adminId: adminId
             }
         });
 
         if (!teamMember) {
             throw new CustomError(
-                "Forbidden: Team Member does not belong to you or it does not exist",
+                "Forbidden: Team member does not belong to your team",
                 403
             );
         }
+
+        await prisma.teamMember.update({
+            where: {
+                id: teamMemberId,
+                adminId: adminId
+            },
+
+            data: {
+                status: status
+            }
+        });
+    };
+
+    isTeamMemberBelongsToAdmin = async (id, adminId) => {
+        const teamMember = await prisma.teamMember.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if (!teamMember) {
+            throw new CustomError("Team member does not exist", 404);
+        }
+
+        if (teamMember.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
+    };
+
+    login = async (email, password) => {
+        const teamMember = await prisma.teamMember.findUnique({
+            where: {
+                email: email
+            },
+            select: {
+                id: true,
+                status: true,
+                password: true,
+                adminId: true
+            }
+        });
+
+        if (!teamMember) throw new CustomError("User does not exist", 404);
+
+        if (teamMember.status === "INACTIVE" && !teamMember.password) {
+            const inviteToken = crypto.createToken();
+            const hashedInviteToken = crypto.hash(inviteToken);
+
+            await prisma.teamMember.update({
+                where: {
+                    email
+                },
+                data: {
+                    inviteToken: hashedInviteToken
+                }
+            });
+            await mailer.sendCreatePasswordInviteToTeamMember(
+                email,
+                inviteToken
+            );
+
+            throw new CustomError(
+                "You did not set up the account password yet. We just emailed an instruction.",
+                400
+            );
+        }
+
+        if (teamMember.status === "INACTIVE" && teamMember.password) {
+            throw new CustomError(
+                "Your account has INACTIVE Status, can not log in",
+                401
+            );
+        }
+
+        const isPasswordMatches = await bcrypt.compare(
+            password,
+            teamMember.password
+        );
+
+        if (!isPasswordMatches) {
+            throw new CustomError("Invalid Credentials", 401);
+        }
+
+        const projects = await prisma.teamMemberProject.findMany({
+            where: {
+                teamMemberId: teamMember.id,
+                status: "ACTIVE"
+            },
+            select: {
+                projectId: true
+            }
+        });
+
+        const projectIds = projects.map((project) => project.projectId);
+
+        const token = jwt.sign(
+            {
+                teamMember: {
+                    id: teamMember.id,
+                    adminId: teamMember.adminId,
+                    projects: projectIds
+                }
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "2 days"
+            }
+        );
+
+        return token;
     };
 }
 

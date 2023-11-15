@@ -71,48 +71,52 @@ class ProjectService {
     };
 
     addContributor = async (adminId, projectId, teamMemberId) => {
-        await this.verifyProjectAndAminRelation(projectId, adminId);
-        await teamMemberService.verifyTeamMemberandAdminRelation(
+        await this.isProjectBelongsToAdmin(projectId, adminId);
+        await teamMemberService.isTeamMemberBelongsToAdmin(
             teamMemberId,
             adminId
         );
-
         await prisma.teamMemberProject.create({
             data: { projectId, teamMemberId }
         });
     };
 
-    deactivateContributor = async (adminId, projectId, teamMemberId) => {
-        await this.verifyProjectAndAminRelation(projectId, adminId);
-        await teamMemberService.verifyTeamMemberandAdminRelation(
+    changeContributorStatus = async (
+        projectId,
+        teamMemberId,
+        adminId,
+        status
+    ) => {
+        await this.isProjectBelongsToAdmin(projectId, adminId);
+        await teamMemberService.isTeamMemberBelongsToAdmin(
             teamMemberId,
             adminId
         );
-
         await prisma.teamMemberProject.updateMany({
             where: {
                 projectId,
                 teamMemberId
             },
-
             data: {
-                status: "INACTIVE"
+                status
             }
         });
     };
 
-    verifyProjectAndAminRelation = async (id, adminId) => {
+    isProjectBelongsToAdmin = async (id, adminId) => {
         const project = await prisma.project.findUnique({
             where: {
-                id,
-                adminId
+                id
             }
         });
 
         if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+        if (project.adminId !== adminId) {
             throw new CustomError(
-                "Forbidden: Project does not belong to you or it does not exist",
-                403
+                "Forbidden: You are not authorized to perform this action",
+                404
             );
         }
     };
