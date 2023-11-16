@@ -1,5 +1,6 @@
 import { adminService } from "../services/admin.service.js";
 import { catchAsync } from "../utils/catch-async.js";
+import jwt from "jsonwebtoken";
 import { CustomError } from "../utils/custom-error.js";
 class AdminController {
     signUp = catchAsync(async (req, res) => {

@@ -11,11 +11,7 @@ adminRouter.get("/activate", adminController.activate);
 adminRouter.patch("/forgot-password", adminController.forgotPassword);
 adminRouter.patch("/reset-password", adminController.resetPassword);
 adminRouter.get("/me", authMiddleware.authenticate, adminController.getMe);
-adminRouter.delete(
-    "/logout",
-    authMiddleware.authenticate,
-    adminController.logout
-);
+
 adminRouter.patch(
     "/me/tasks",
     authMiddleware.authenticate,
@@ -38,12 +34,6 @@ adminRouter.patch(
     "/me/tasks/:taskId",
     authMiddleware.authenticate,
     adminController.updateTask
-);
-
-adminRouter.delete(
-    "/me/tasks/:taskId/delete",
-    authMiddleware.authenticate,
-    adminController.deleteTask
 );
 
 export { adminRouter };
