@@ -1,6 +1,5 @@
 import { adminService } from "../services/admin.service.js";
 import { catchAsync } from "../utils/catch-async.js";
-import jwt from "jsonwebtoken";
 import { CustomError } from "../utils/custom-error.js";
 class AdminController {
     signUp = catchAsync(async (req, res) => {
@@ -105,12 +104,6 @@ class AdminController {
             data: me
         });
     });
-
-    // logout = catchAsync(async (req, res) => {
-    //     res.status(200).send({
-    //         token: ""
-    //     });
-    // });
 
     createTask = catchAsync(async (req, res) => {
         const { adminId, body } = req;
