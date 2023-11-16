@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { CustomError } from "../utils/custom-error.js";
 
 class AuthMiddleware {
     authenticate = (req, res, next) => {
