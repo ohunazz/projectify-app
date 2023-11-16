@@ -25,7 +25,13 @@ class AuthMiddleware {
         try {
             const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-            req.adminId = payload.adminId;
+            if (payload.adminId) {
+                req.adminId = payload.adminId;
+            }
+
+            if (payload.teamMember) {
+                req.teamMember = payload.teamMember;
+            }
 
             next();
         } catch (error) {

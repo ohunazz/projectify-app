@@ -101,7 +101,10 @@ class AdminService {
         });
 
         if (!admin) {
-            throw new Error("Invalid Token");
+            throw new CustomError(
+                "Admin does not exist with with provided Activation Token",
+                404
+            );
         }
 
         await prisma.admin.update({
@@ -126,8 +129,9 @@ class AdminService {
         });
 
         if (!admin) {
-            throw new Error(
-                "We could not find a admin with the email you provided"
+            throw new CustomError(
+                "Admin does not exist with provided email",
+                404
             );
         }
 
@@ -161,7 +165,10 @@ class AdminService {
         });
 
         if (!admin) {
-            throw new Error("Invalid Token");
+            throw new CustomError(
+                "Admin does not exist with  provided Password Reset Token",
+                404
+            );
         }
 
         const currentTime = new Date();
@@ -169,7 +176,10 @@ class AdminService {
 
         if (tokenExpDate < currentTime) {
             // Token Expired;
-            throw new Error("Reset Token Expired");
+            throw new CustomError(
+                "Password Reset Token Expired: Request a new one",
+                400
+            );
         }
 
         await prisma.admin.update({
@@ -199,7 +209,7 @@ class AdminService {
         });
 
         if (!admin) {
-            throw new Error("Admin does not exist anymore, 404");
+            throw new CustomError("Admin does not exist anymore, 404");
         }
 
         const company = await prisma.company.findFirst({
@@ -262,7 +272,7 @@ class AdminService {
 
         const task = admin.tasks.find((task) => task.id === taskId);
         if (!task) {
-            throw new Error("Task not found");
+            throw new CustomError("Task not found", 404);
         }
 
         return task;
@@ -282,7 +292,7 @@ class AdminService {
         const tasksToKeep = admin.tasks.filter((task) => task.id !== taskId);
 
         if (tasksToKeep.length === admin.tasks.length) {
-            throw new Error("Task not found");
+            throw new CustomError("Task not found", 404);
         }
 
         await prisma.admin.update({
@@ -319,7 +329,7 @@ class AdminService {
         });
 
         if (!taskToUpdate) {
-            throw new Error("Task not found");
+            throw new CustomError("Task not found", 404);
         }
 
         const updatedTask = {

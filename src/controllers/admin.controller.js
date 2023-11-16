@@ -1,6 +1,6 @@
 import { adminService } from "../services/admin.service.js";
-import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async.js";
+import jwt from "jsonwebtoken";
 import { CustomError } from "../utils/custom-error.js";
 class AdminController {
     signUp = catchAsync(async (req, res) => {
@@ -71,7 +71,8 @@ class AdminController {
         } = req;
         if (!password || !passwordConfirm) {
             throw new CustomError(
-                "Both Password and Password Confirmation are required"
+                "Both Password and Password Confirmation are required",
+                400
             );
         }
 
@@ -105,11 +106,11 @@ class AdminController {
         });
     });
 
-    logout = catchAsync(async (req, res) => {
-        res.status(200).send({
-            token: ""
-        });
-    });
+    // logout = catchAsync(async (req, res) => {
+    //     res.status(200).send({
+    //         token: ""
+    //     });
+    // });
 
     createTask = catchAsync(async (req, res) => {
         const { adminId, body } = req;
@@ -121,7 +122,7 @@ class AdminController {
         };
 
         if (!input.title || !input.due) {
-            throw new CustomError(" Both Title or Due date are required");
+            throw new CustomError(" Both Title or Due date are required", 404);
         }
 
         const data = await adminService.createTask(adminId, input);
