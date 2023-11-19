@@ -107,8 +107,8 @@ model Story {
 
     title       String
     description String?
-    status      StoryStatus
+    status      StoryStatus @default(TODO)
     due         DateTime
-    point       Int
-    assigneeId  String      @db.ObjectId
+    point       Int?
+    assigneeId  String?     @db.ObjectId
 }
