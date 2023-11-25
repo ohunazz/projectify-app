@@ -27,7 +27,7 @@ class ProjectService {
 
         if (project.adminId !== adminId) {
             throw new CustomError(
-                "Forbidden: This project does not belong to you!",
+                "Forbidden: You are not authorized to perform this action",
                 403
             );
         }
@@ -36,6 +36,23 @@ class ProjectService {
     };
 
     update = async (id, adminId, update) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id: id
+            }
+        });
+
+        if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+
+        if (project.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
+
         await prisma.project.update({
             where: {
                 id: id,
@@ -70,7 +87,7 @@ class ProjectService {
         });
     };
 
-    addContributor = async (adminId, projectId, teamMemberId) => {
+    addContributor = async (projectId, teamMemberId, adminId) => {
         await this.isProjectBelongsToAdmin(projectId, adminId);
         await teamMemberService.isTeamMemberBelongsToAdmin(
             teamMemberId,

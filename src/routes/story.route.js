@@ -11,4 +11,6 @@ storyRouter.post(
     storyController.create
 );
 
+storyRouter.get("/:id", authMiddleware.authenticate, storyController.getOne);
+
 export { storyRouter };
