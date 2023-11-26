@@ -13,4 +13,6 @@ storyRouter.post(
 
 storyRouter.get("/:id", authMiddleware.authenticate, storyController.getOne);
 
+storyRouter.get("/", authMiddleware.authenticate, storyController.getAll);
+
 export { storyRouter };

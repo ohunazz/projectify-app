@@ -30,6 +30,26 @@ class StoryService {
 
         return story;
     };
+    getAll = async (adminId, teamMember) => {
+        if (adminId) {
+            const stories = await prisma.story.findMany({
+                where: {
+                    adminId: adminId
+                }
+            });
+
+            return stories;
+        }
+
+        if (teamMember) {
+            const stories = await prisma.story.findMany({
+                where: {
+                    assigneeId: teamMember.id
+                }
+            });
+            return stories;
+        }
+    };
 
     isStoryBelongsToTeamMember = async (id, teamMember) => {
         const story = await prisma.story.findUnique({

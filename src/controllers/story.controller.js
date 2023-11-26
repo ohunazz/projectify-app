@@ -32,5 +32,15 @@ class StoryController {
             data: story
         });
     });
+
+    getAll = catchAsync(async (req, res) => {
+        const { adminId, teamMember } = req;
+
+        const stories = await storyService.getAll(adminId, teamMember);
+
+        res.status(200).json({
+            data: stories
+        });
+    });
 }
 export const storyController = new StoryController();
