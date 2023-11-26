@@ -8,7 +8,10 @@ class StoryController {
             adminId
         } = req;
         if (!title || !projectId) {
-            throw new CustomError("All fiels are required", 400);
+            throw new CustomError(
+                "All fields are required: Title, Description and Due date!",
+                400
+            );
         }
         const input = {
             title,
@@ -18,16 +21,17 @@ class StoryController {
             assigneeId,
             projectId
         };
-
         const story = await storyService.create(input, adminId);
-        res.status(200).json({ data: story });
+        res.status(200).json({
+            data: story
+        });
     });
 
     getOne = catchAsync(async (req, res) => {
-        const { params, adminId, teamMember } = req;
-
-        const story = await storyService.getOne(params.id, adminId, teamMember);
-
+        const {
+            params: { id }
+        } = req;
+        const story = await storyService.getOne(id);
         res.status(200).json({
             data: story
         });

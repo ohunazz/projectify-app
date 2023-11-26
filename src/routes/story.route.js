@@ -11,7 +11,12 @@ storyRouter.post(
     storyController.create
 );
 
-storyRouter.get("/:id", authMiddleware.authenticate, storyController.getOne);
+storyRouter.get(
+    "/:id",
+    authMiddleware.authenticate,
+    authMiddleware.verifyReadUpdateDeleteStoryPermissions,
+    storyController.getOne
+);
 
 storyRouter.get("/", authMiddleware.authenticate, storyController.getAll);
 
