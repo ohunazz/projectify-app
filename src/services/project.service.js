@@ -55,8 +55,7 @@ class ProjectService {
 
         await prisma.project.update({
             where: {
-                id: id,
-                adminId: adminId
+                id: id
             },
             data: {
                 ...update
@@ -75,6 +74,22 @@ class ProjectService {
     };
 
     changeStatus = async (id, adminId, status) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id: id
+            }
+        });
+
+        if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+
+        if (project.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
         await prisma.project.update({
             where: {
                 id: id,
