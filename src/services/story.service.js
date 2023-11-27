@@ -1,5 +1,6 @@
 import { prisma } from "../prisma/index.js";
 import { projectService } from "./project.service.js";
+import { CustomError } from "../utils/custom-error.js";
 
 class StoryService {
     create = async (input, adminId) => {
@@ -10,61 +11,44 @@ class StoryService {
         return story;
     };
 
-    getOne = async (id, adminId, teamMember) => {
+    getOne = async (id) => {
         const story = await prisma.story.findUnique({
             where: {
                 id: id
             }
         });
-
-        if (adminId) {
-            await projectService.isProjectBelongsToAdmin(
-                story.projectId,
-                adminId
-            );
-        }
-
-        if (teamMember) {
-            await this.isStoryBelongsToTeamMember(id, teamMember);
+        if (!story) {
+            throw new CustomError("Story does not exist", 404);
         }
 
         return story;
     };
-    getAll = async (adminId, teamMember) => {
-        if (adminId) {
-            const stories = await prisma.story.findMany({
-                where: {
-                    adminId: adminId
-                }
-            });
+    getAll = async (projectId, adminId) => {
+        await projectService.isProjectBelongsToAdmin(projectId, adminId);
 
-            return stories;
-        }
-
-        if (teamMember) {
-            const stories = await prisma.story.findMany({
-                where: {
-                    assigneeId: teamMember.id
-                }
-            });
-            return stories;
-        }
-    };
-
-    isStoryBelongsToTeamMember = async (id, teamMember) => {
-        const story = await prisma.story.findUnique({
+        const stories = await prisma.story.findMany({
             where: {
-                id
+                projectId: projectId
             }
         });
 
-        if (!story) {
-            throw new CustomError("Story does not exist", 404);
-        }
-        if (teamMember.id !== story.assigneeId) {
-            throw new CustomError("This story does not belong to you", 400);
-        }
+        return stories;
     };
+
+    // isStoryBelongsToTeamMember = async (id, teamMember) => {
+    //     const story = await prisma.story.findUnique({
+    //         where: {
+    //             id
+    //         }
+    //     });
+
+    //     if (!story) {
+    //         throw new CustomError("Story does not exist", 404);
+    //     }
+    //     if (teamMember.id !== story.assigneeId) {
+    //         throw new CustomError("This story does not belong to you", 400);
+    //     }
+    // };
 }
 
 export const storyService = new StoryService();

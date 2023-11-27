@@ -14,10 +14,22 @@ storyRouter.post(
 storyRouter.get(
     "/:id",
     authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    storyController.getOne
+);
+
+storyRouter.get(
+    "/:id",
+    authMiddleware.authenticate,
     authMiddleware.verifyReadUpdateDeleteStoryPermissions,
     storyController.getOne
 );
 
-storyRouter.get("/", authMiddleware.authenticate, storyController.getAll);
+storyRouter.get(
+    "/projectStories/:projectId",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    storyController.getAll
+);
 
 export { storyRouter };

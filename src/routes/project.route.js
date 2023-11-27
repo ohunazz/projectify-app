@@ -14,12 +14,14 @@ projectRouter.post(
 projectRouter.patch(
     "/contributors/deactivate",
     authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.deactivateContributor
 );
 
 projectRouter.patch(
     "/contributors/reactivate",
     authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.reactivateContributor
 );
 
@@ -35,7 +37,6 @@ projectRouter.get(
     authMiddleware.isAdmin,
     projectController.getOne
 );
-
 projectRouter.patch(
     "/:id",
     authMiddleware.authenticate,
@@ -55,7 +56,6 @@ projectRouter.patch(
     authMiddleware.isAdmin,
     projectController.archive
 );
-
 projectRouter.patch(
     "/:id/reactivate",
     authMiddleware.authenticate,
