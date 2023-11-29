@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4040;
 
 app.use("/admin", adminRouter);
 app.use("/projects", projectRouter);
