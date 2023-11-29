@@ -32,4 +32,12 @@ storyRouter.get(
     storyController.getAll
 );
 
+storyRouter.patch(
+    "/:id",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    authMiddleware.verifyReadUpdateDeleteStoryPermissions,
+    storyController.update
+);
+
 export { storyRouter };

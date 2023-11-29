@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import { CustomError } from "../utils/custom-error.js";
 import { catchAsync } from "../utils/catch-async.js";
+import { prisma } from "../prisma/index.js";
+import { storyService } from "../services/story.service.js";
 
 class AuthMiddleware {
     authenticate = (req, _, next) => {

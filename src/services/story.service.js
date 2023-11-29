@@ -35,6 +35,18 @@ class StoryService {
         return stories;
     };
 
+    update = async (id, assigneeId, update) => {
+        await prisma.story.update({
+            where: {
+                id: id,
+                assigneeId: assigneeId
+            },
+            data: {
+                ...update
+            }
+        });
+    };
+
     // isStoryBelongsToTeamMember = async (id, teamMember) => {
     //     const story = await prisma.story.findUnique({
     //         where: {
