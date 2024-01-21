@@ -110,6 +110,18 @@ class TeamMemberController {
             token: jwt
         });
     });
+
+    forgotPassword = catchAsync(async (req, res) => {
+        const {
+            body: { email }
+        } = req;
+
+        await teamMemberService.forgotPassword(email);
+        res.status(200).json({
+            message:
+                "We emailed you an instruction to reset your password. Follow it!"
+        });
+    });
 }
 
 export const teamMemberController = new TeamMemberController();
