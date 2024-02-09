@@ -31,14 +31,14 @@ class Mailer {
             await this.send({
                 to: emailAddress,
                 subject: "Projectify App | Activate Your Account",
-                html: `<a href="${this.baseApiURL}/admin/activate?activationToken=${token}">Verify your email</a>`
+                html: `<a href="${this.baseApiURL}/admins/activate?activationToken=${token}">Verify your email</a>`
             });
         } catch (error) {
             throw error;
         }
     };
 
-    sendPasswordResetTokenAdmin = async (emailAddress, token) => {
+    sendPasswordResetToken = async (emailAddress, token) => {
         try {
             this.send({
                 to: emailAddress,
