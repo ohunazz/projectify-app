@@ -48,6 +48,13 @@ teamMemberRouter.delete(
     teamMemberController.delete
 );
 
+teamMemberRouter.patch(
+    "/:id/update",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    teamMemberController.update
+);
+
 teamMemberRouter.post("/login", teamMemberController.login);
 teamMemberRouter.patch("/forgot-password", teamMemberController.forgotPassword);
 teamMemberRouter.patch("/reset-password", teamMemberController.resetPassword);

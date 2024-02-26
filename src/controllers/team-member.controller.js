@@ -87,7 +87,6 @@ class TeamMemberController {
 
     delete = catchAsync(async (req, res) => {
         const { adminId, params } = req;
-        console.log(params);
         await teamMemberService.delete(adminId, params.id);
 
         res.status(204).send();
@@ -97,6 +96,32 @@ class TeamMemberController {
         const { adminId, params } = req;
         await teamMemberService.changeStatus(adminId, params.id, "ACTIVE");
 
+        res.status(204).send();
+    });
+
+    update = catchAsync(async (req, res) => {
+        const {
+            adminId,
+            params,
+            body: { firstName, lastName, position, joinDate },
+            body
+        } = req;
+        const updateData = {};
+
+        if (firstName) {
+            updateData.firstName = firstName;
+        }
+        if (lastName) {
+            updateData.lastName = lastName;
+        }
+        if (position) {
+            updateData.position = position;
+        }
+        if (joinDate) {
+            updateData.joinDate = joinDate;
+        }
+
+        await teamMemberService.update(adminId, params.id, updateData);
         res.status(204).send();
     });
 
