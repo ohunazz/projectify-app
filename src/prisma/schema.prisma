@@ -15,6 +15,7 @@ enum AccountStatus {
 enum ProjectStatus {
     ACTIVE
     ARCHIVED
+    COMPLETED
 }
 
 enum TaskStatus {
@@ -47,8 +48,7 @@ model Company {
     id       String @id @default(auto()) @map("_id") @db.ObjectId
     name     String
     position String
-
-    adminId String @unique @db.ObjectId
+    adminId  String @unique @db.ObjectId
 }
 
 model Admin {
@@ -73,6 +73,8 @@ model Project {
     description String
     status      ProjectStatus @default(ACTIVE)
     adminId     String        @db.ObjectId
+    startDate   DateTime
+    endDate     DateTime
     createdAt   DateTime      @default(now())
     updatedAt   DateTime      @updatedAt
 }
