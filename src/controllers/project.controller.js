@@ -73,24 +73,9 @@ class ProjectController {
         });
     });
 
-    archive = catchAsync(async (req, res) => {
-        const { params, adminId } = req;
-
-        await projectService.changeStatus(params.id, adminId, "ARCHIVED");
-        res.status(204).send();
-    });
-
-    reactivate = catchAsync(async (req, res) => {
-        const { params, adminId } = req;
-
-        await projectService.changeStatus(params.id, adminId, "ACTIVE");
-        res.status(204).send();
-    });
-
-    onhold = catchAsync(async (req, res) => {
-        const { params, adminId } = req;
-
-        await projectService.changeStatus(params.id, adminId, "ONHOLD");
+    changeStatus = catchAsync(async (req, res) => {
+        const { body, params, adminId } = req;
+        await projectService.changeStatus(params.id, adminId, body.status);
         res.status(204).send();
     });
 
