@@ -151,6 +151,76 @@ class TeamMemberController {
         });
     });
 
+    changePassword = catchAsync(async (req, res) => {
+        const { teamMember, body } = req;
+
+        const input = {
+            password: body.password,
+            newPassword: body.newPassword,
+            newPasswordConfirm: body.newPasswordConfirm
+        };
+
+        if (
+            !input.password ||
+            !input.newPassword ||
+            !input.newPasswordConfirm
+        ) {
+            "All fields are required: Current Password and New Password, New Password Confirmation",
+                400;
+        }
+
+        if (input.password === input.newPassword) {
+            throw new CustomError(
+                "Provide Valid New Password which does not match Current Password ",
+                400
+            );
+        }
+
+        if (input.newPassword !== input.newPasswordConfirm) {
+            throw new CustomError(
+                "New Password and New Password Confirmation must match",
+                400
+            );
+        }
+
+        await teamMemberService.changePassword(teamMember.id, input);
+
+        res.status(200).json({
+            message: "You successfully updated your password!"
+        });
+    });
+
+    changePasswordByAdmin = catchAsync(async (req, res) => {
+        const { adminId, params, body } = req;
+
+        const input = {
+            newPassword: body.newPassword,
+            newPasswordConfirm: body.newPasswordConfirm
+        };
+
+        if (!input.newPassword || !input.newPasswordConfirm) {
+            "All fields are required:New Password, New Password Confirmation",
+                400;
+        }
+
+        if (input.newPassword !== input.newPasswordConfirm) {
+            throw new CustomError(
+                "New Password and New Password Confirmation must match",
+                400
+            );
+        }
+
+        await teamMemberService.changePasswordByAdmin(
+            adminId,
+            params.id,
+            input
+        );
+
+        res.status(200).json({
+            message: "You successfully updated your Team Member password!"
+        });
+    });
+
     forgotPassword = catchAsync(async (req, res) => {
         const {
             body: { email }
