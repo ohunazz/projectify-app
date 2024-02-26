@@ -87,6 +87,7 @@ model TeamMember {
     status      AccountStatus @default(INACTIVE)
     adminId     String        @db.ObjectId
     inviteToken String?
+    joinDate    DateTime
     createdAt   DateTime      @default(now())
     updatedAt   DateTime      @updatedAt
 }
