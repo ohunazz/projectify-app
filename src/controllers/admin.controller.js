@@ -22,7 +22,8 @@ class AdminController {
 
         await adminService.signUp(adminInput, companyInput);
         res.status(201).json({
-            message: "Success"
+            message:
+                "We have just sent you an email. Please, Activate your account."
         });
     });
 
@@ -61,7 +62,8 @@ class AdminController {
 
         await adminService.forgotPassword(email);
         res.status(200).json({
-            message: "Password reset email has been sent"
+            message:
+                "We emailed you an instruction to reset your password. Follow it!"
         });
     });
 
@@ -128,14 +130,24 @@ class AdminController {
 
     getTasks = catchAsync(async (req, res) => {
         const { adminId } = req;
+        if (!adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
         const tasks = await adminService.getTasks(adminId);
-        res.status(200).json({ data: tasks });
+        res.status(200).json({
+            data: tasks
+        });
     });
 
     getTask = catchAsync(async (req, res) => {
         const { adminId, params } = req;
         const task = await adminService.getTask(adminId, params.taskId);
-        res.status(200).json({ data: task });
+        res.status(200).json({
+            data: task
+        });
     });
 
     deleteTask = catchAsync(async (req, res) => {
@@ -157,6 +169,9 @@ class AdminController {
         }
         if (body.description) {
             input.description = body.description;
+        }
+        if (body.due) {
+            input.due = body.due;
         }
         if (!Object.keys(input).length) {
             throw new CustomError("Update data is required", 400);
