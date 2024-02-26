@@ -11,6 +11,13 @@ teamMemberRouter.post(
     teamMemberController.create
 );
 
+teamMemberRouter.get(
+    "/me",
+    authMiddleware.authenticate,
+    authMiddleware.isTeamMember,
+    teamMemberController.getMe
+);
+
 teamMemberRouter.patch("/create-password", teamMemberController.createPassword);
 
 teamMemberRouter.get(
@@ -32,6 +39,13 @@ teamMemberRouter.patch(
     authMiddleware.authenticate,
     authMiddleware.isAdmin,
     teamMemberController.reactivate
+);
+
+teamMemberRouter.delete(
+    "/delete",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    teamMemberController.delete
 );
 
 teamMemberRouter.post("/login", teamMemberController.login);
