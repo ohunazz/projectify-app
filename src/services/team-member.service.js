@@ -5,6 +5,7 @@ import { mailer } from "../utils/mailer.js";
 import { date } from "../utils/date.js";
 import { CustomError } from "../utils/custom-error.js";
 import { bcrypt } from "../utils/bcrypt.js";
+import { v4 as uuid } from "uuid";
 
 class TeamMemberService {
     create = async (adminId, input) => {

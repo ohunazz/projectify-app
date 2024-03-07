@@ -86,7 +86,7 @@ class AdminController {
             );
         }
         if (!headers.authorization) {
-            throw (new CustomError("Password Reset Token is missing"), 400);
+            throw new CustomError("Password Reset Token is missing", 400);
         }
         const [bearer, token] = headers.authorization.split(" ");
         if (bearer !== "Bearer" || !token) {
