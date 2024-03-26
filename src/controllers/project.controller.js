@@ -56,16 +56,13 @@ class ProjectController {
             update.description = body.description;
         }
 
-        if (!update.name && !update.description) {
-            throw new CustomError("No update data provided", 400);
-        }
         if (body.startDate) {
             update.startDate = body.startDate;
         }
-
         if (body.endDate) {
             update.endDate = body.endDate;
         }
+
         if (
             (update.startDate && !update.endDate) ||
             (!update.startDate && update.endDate)
@@ -81,6 +78,10 @@ class ProjectController {
                 "End date cannot be equal or less than Start date",
                 400
             );
+        }
+
+        if (!update.name || !update.description) {
+            throw new CustomError("No update data provided", 400);
         }
 
         await projectService.update(params.id, adminId, update);
@@ -103,39 +104,30 @@ class ProjectController {
     });
 
     addContributor = catchAsync(async (req, res) => {
-        const { adminId, body } = req;
+        const { adminId, body, params } = req;
 
-        if (!body.teamMemberId || !body.projectId) {
-            throw new CustomError(
-                "All fields are required: teamMemberId, projectId",
-                400
-            );
+        if (!body.teamMemberId) {
+            throw new CustomError("Team Member Id is required", 400);
         }
 
         await projectService.addContributor(
-            body.projectId,
+            params.id,
             body.teamMemberId,
             adminId
         );
 
         res.status(200).json({
-            message: `Team member with ${body.teamMemberId} id was added to project with ${body.projectId} id`
+            message:
+                "Team Member has been successfully added as a contributore!"
         });
     });
 
     deactivateContributor = catchAsync(async (req, res) => {
-        const { adminId, body } = req;
-
-        if (!body.teamMemberId || !body.projectId) {
-            throw new CustomError(
-                "All fields are required: teamMemberId, projectId",
-                400
-            );
-        }
+        const { adminId, params } = req;
 
         await projectService.changeContributorStatus(
-            body.projectId,
-            body.teamMemberId,
+            params.id,
+            params.contributorId,
             adminId,
             "INACTIVE"
         );
@@ -144,18 +136,11 @@ class ProjectController {
     });
 
     reactivateContributor = catchAsync(async (req, res) => {
-        const { adminId, body } = req;
-
-        if (!body.teamMemberId || !body.projectId) {
-            throw new CustomError(
-                "All fields are required: teamMemberId, projectId",
-                400
-            );
-        }
+        const { adminId, params } = req;
 
         await projectService.changeContributorStatus(
-            body.projectId,
-            body.teamMemberId,
+            params.projectId,
+            params.contributorId,
             adminId,
             "ACTIVE"
         );

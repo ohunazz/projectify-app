@@ -32,7 +32,7 @@ enum StoryStatus {
     ARCHIVED
 }
 
-enum TeamMemberProjectStatus {
+enum ContributorStatus {
     ACTIVE
     INACTIVE
 }
@@ -98,14 +98,14 @@ model TeamMember {
     updatedAt                        DateTime      @updatedAt
 }
 
-model TeamMemberProject {
-    id           String                  @id @default(auto()) @map("_id") @db.ObjectId
-    teamMemberId String                  @db.ObjectId
-    projectId    String                  @db.ObjectId
-    joinedAt     DateTime                @default(now())
-    createdAt    DateTime                @default(now())
-    updatedAt    DateTime                @updatedAt
-    status       TeamMemberProjectStatus @default(ACTIVE)
+model Contributor {
+    id           String            @id @default(auto()) @map("_id") @db.ObjectId
+    teamMemberId String            @db.ObjectId
+    projectId    String            @db.ObjectId
+    status       ContributorStatus @default(ACTIVE)
+    joinedAt     DateTime          @default(now())
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
 }
 
 model Story {
